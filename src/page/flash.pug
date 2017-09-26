@@ -1,0 +1,12 @@
+extends ../../lib/layout.pug
+
+block title
+  | Shockwave Flash Games
+
+block main-section
+  main#main.flash.no-side-pane
+    #main-embed-container.media-container.embed-container.flash
+    +main-game-list('flash', join(src, 'media', 'swf'))
+
+block append body-script
+  +subpage-script-list('flash', 'common-subpage')

@@ -2,6 +2,10 @@
 hidden, [hidden], .hidden
   display none !important
 
+disabled, [disabled], .disabled
+  &, & *
+    pointer-events none !important
+
 b, strong, .bold, .strong
   font-weight bold !important
 
@@ -28,3 +32,8 @@ code, .code
 
 .pointer-cursor
   cursor pointer
+
+.background-image
+  background-position center
+  background-repeat no-repeat
+  background-origin content-box

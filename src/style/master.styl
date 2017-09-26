@@ -1,5 +1,692 @@
 
-page-width = 100%
-unit-size = (100% / 960)
-column-width = (60 * unit-size)
-common-margin = (20 * unit-size)
+// CONSTANTS
+
+adaptive-split = 480px
+std-square-size = 60px
+std-square-margin = 10px
+std-square-container-size = (std-square-size + 2 * std-square-margin)
+std-theme-background = #0e1112
+std-sidepane-background = #121617
+std-onview-background = #ffa500
+std-onview-hover-background = #faae23
+std-onview-active-background = #f0a722
+std-textbox-background = #3d0714
+std-hover-background = #7e3114
+std-active-background = #b44014
+std-brighter-hover-background = #8c3b1c
+std-brighter-active-background = #bd481b
+std-zoomed-article-background = #300b06
+
+// FUNCTIONS
+
+fun-std-inner-size(count)
+  (count * std-square-size + (count - 1) * std-square-margin)
+
+fun-std-outer-size(count)
+  (count * std-square-size + (count + 1) * std-square-margin)
+
+fun-std-inner-limit(count)
+  (fun-std-outer-size(count) + std-square-margin)
+
+fun-std-outer-limit(count)
+  (fun-std-inner-size(count) - std-square-margin)
+
+// MIXINS
+
+mix-rectange(width, height)
+  width width
+  height height
+
+mix-square(size)
+  mix-rectange(size, size)
+
+mix-std-inner-rectangle(width, height)
+  width fun-std-inner-size(width)
+  height fun-std-inner-size(height)
+
+mix-std-inner-square(count)
+  mix-std-inner-rectangle(count, count)
+
+mix-std-outer-rectangle(width, height)
+  width fun-std-outer-size(width)
+  height fun-std-outer-size(height)
+
+mix-std-outer-square(count)
+  mix-std-outer-rectangle(count, count)
+
+mix-bgimg-size(size)
+  background-size size
+  background-repeat no-repeat
+  background-position center
+
+mix-transition()
+  transition-duration 500ms
+  transition-timing-function ease
+
+mix-deep-transition()
+  &, & *
+    mix-transition()
+
+// CSS ASSETS
+
+@keyframes horizontal-spin
+  from
+    transform rotateY(0deg)
+
+  to
+    transform rotateY(-360deg)
+
+// GLOBAL RULES
+
+.ready-for-transition
+  mix-deep-transition()
+
+body
+  margin 0px
+  padding 0px
+  font-family 'Roboto', 'Product Sans', 'Cantarell', 'Segoe UI', 'Verdana', 'Helvatica', 'arial', sans-serif
+  user-select none
+  cursor default
+  width 100%
+  margin 0px
+  padding 0px
+
+for i in (1..6)
+  h{i}
+    font-weight normal
+    font-size ((std-square-size - 2 * std-square-margin) / i)
+
+:focus
+  outline none !important
+
+disabled, [disabled], .disabled
+  filter brightness(0.5) !important
+
+.details, .description
+  text-align justify
+
+#main-header, #main-section, #main-footer
+  width 100%
+  display block
+
+#main-header
+  height fun-std-outer-size(1)
+  *
+    display inline-block
+
+#main-footer
+  height fun-std-outer-size(2)
+  text-align center
+  font-size 0.75em
+
+  a[href]
+    color #1fcdde
+    text-decoration none
+    cursor pointer
+
+    &:hover
+      color #56dce9
+      text-decoration underline
+
+  .copyright-claim
+    margin-left auto
+    margin-right auto
+
+#menu-container, #logo-container, #search-button-container
+  display inline-block
+
+#menu-container
+  position fixed
+  top 0px
+
+#menu-button-container, #search-button-container
+  mix-std-outer-square(1)
+  top 0px
+  position fixed
+
+  &:not(:hover):not(:active)
+    background-color std-theme-background
+
+  &:hover
+    background-color std-hover-background
+
+  &:active
+    background-color std-active-background
+
+#menu-container, #menu-button-container
+  left 0px
+
+#search-container, #search-button-container
+  right 0px
+
+  html:not(.javascript-enabled) &
+    display none !important
+
+#logo-container
+  position absolute
+  top 0px
+  height fun-std-outer-size(1)
+  left fun-std-inner-limit(1)
+  overflow hidden
+
+#menu-button, #search-button
+  background-color transparent
+  border 0px solid white
+  mix-std-inner-square(1)
+  margin std-square-margin
+  mix-bgimg-size(std-square-size - 2 * std-square-margin)
+
+#menu-button
+  background-image url(../image/menu.svg)
+
+#search-button
+  background-image url(../image/search.svg)
+
+#logo
+  background-color transparent
+  height fun-std-outer-size(1)
+
+#menu-container h2, #logo h1
+  text-transform uppercase
+  vertical-align middle
+  margin std-square-margin
+  line-height std-square-size
+  padding 0px
+
+#menu-container
+  position fixed
+  width fun-std-outer-size(3)
+
+  & > *
+    display block
+
+  #menu-button-container
+    z-index 2
+
+    & > *
+      display inline-block
+      overflow hidden
+      vertical-align middle
+
+  #main-menu
+    position fixed
+    top fun-std-outer-size(1)
+    margin 0px
+    z-index -1
+    overflow-x hidden
+    overflow-y auto
+    margin-left 0px
+    padding-left 0px
+    display inline-block
+    mix-square(100%)
+
+    li
+      width 100%
+      height fun-std-outer-size(1)
+      text-align center
+
+      &:hover
+        background-color std-hover-background
+
+      &:active
+        background-color std-active-background
+
+      &[on-view]
+        background-color std-onview-background
+
+        &:hover
+          background-color std-onview-hover-background
+
+        &:active
+          background-color std-onview-active-background
+
+      a, a[href]
+        text-decoration none
+        color white
+        display inline-block
+        width 100%
+        padding-top (2.5 * std-square-margin)
+        padding-bottom (2.5 * std-square-margin)
+        font-size 1.5em
+
+#menu-visibility-checkbox
+  &:not(:checked) + #menu-container
+    width fun-std-outer-size(1)
+
+    #menu-title
+      width 0px
+      opacity 0.0
+      font-size 0px
+
+    #main-menu
+      left fun-std-outer-size(1)
+      width 0px
+      opacity 0.0
+      z-index -1
+
+      a
+        font-size 0em
+
+  &:checked + #menu-container
+    z-index 2
+    height 100%
+    background-color std-sidepane-background
+
+    &, & #menu-button-container
+      width fun-std-outer-size(3)
+
+    #menu-title
+      opacity 1.0
+
+    #main-menu
+      left 0px
+      width fun-std-outer-size(3)
+      opacity 1.0
+      z-index 3
+
+#search-input
+  position fixed
+  height std-square-size
+  right fun-std-outer-size(1)
+  padding std-square-margin
+  border 0px
+  background-color std-textbox-background
+  color white
+  font-size 1.75em
+
+#search-option-container
+  position fixed
+  top fun-std-outer-size(1)
+  mix-std-outer-rectangle(7, 1)
+
+  body.show-search-box &
+    right 8px
+
+  body:not(.show-search-box) &
+    right fun-std-outer-limit(-7)
+
+#filter-field-select
+  appearance none
+  -webkit-appearance none
+  -moz-appearance none
+  border none
+  color white
+  font-size 1.5em
+  background-image url(../image/arrow-down.svg)
+  background-position right
+  background-color std-sidepane-background
+  background-repeat no-repeat
+  background-size (std-square-size - 2 * std-square-margin)
+  width (fun-std-outer-size(7) - fun-std-inner-limit(1))
+  height std-square-size
+
+#case-sensitive-checkbox
+  & + label
+    display inline-block
+    font-size 2em
+    text-align center
+    vertical-align center
+    line-height std-square-size
+    mix-std-inner-square(1)
+
+    *
+      transition-duration 0s
+
+    &:hover *
+      filter drop-shadow(0px 0px 2px)
+
+  &:not(:checked) + label
+    background-color std-sidepane-background
+    color std-active-background
+
+  &:checked + label
+    background-color std-active-background
+    color std-sidepane-background
+
+body:not(.show-search-box)
+  #logo-container
+    right fun-std-inner-limit(1)
+
+  #search-input
+    width 0px
+    opacity 0.0
+
+body.show-search-box
+  #logo-container
+    right fun-std-inner-limit(6 + 1)
+
+  #search-input
+    width fun-std-inner-size(6)
+    opacity 1.0
+
+  #search-button-container
+    background-color std-hover-background
+
+    &:hover
+      background-color std-brighter-hover-background
+
+    &:active
+      background-color std-brighter-active-background
+
+#main-section
+  vertical-align top
+
+  *
+    display inline-block
+
+  #search-result
+    &:empty
+      display none
+
+    &:not(:empty)
+      & + #main
+        display none
+
+    &, & .heading, & p
+      display block
+
+    .link
+      &:visited, &:link
+        color red
+
+        &:hover
+          color orange
+
+        &:active
+          color yellow
+
+    & > .no-search-result
+      display block
+      height fun-std-inner-size(4)
+      line-height fun-std-inner-size(4)
+      text-align center
+      vertical-align center
+      font-size 2.5em
+
+    & > :not(.no-search-result)
+      display block
+      padding-left std-square-margin
+      padding-right std-square-margin
+      margin-top std-square-margin
+      margin-bottom std-square-margin
+      overflow hidden
+      background-color std-sidepane-background
+      background-clip content-box
+      width 100%
+      height fun-std-inner-size(3)
+      box-sizing border-box
+
+  #main
+    left 0px
+
+    &:not(.no-side-pane)
+      right fun-std-inner-limit(2)
+
+    &.no-side-pane
+      right 0px
+
+    .media-container
+      background-color std-theme-background
+      position fixed
+      left 0px
+      top 0px
+      right 0px
+      bottom 0px
+      z-index 6
+
+      &:empty
+        transform rotateY(90deg)
+        opacity 0.0
+
+      &:not(:empty)
+        opacity 1.0
+
+      .media
+        position fixed
+        margin auto
+
+      .controller
+        white-space nowrap
+        overflow hidden
+        position fixed
+        top 0px
+        right 0px
+        height std-square-size
+        background-color std-sidepane-background
+        transform-origin right
+
+        &:not(:hover)
+          transform rotateY(85deg)
+
+          button
+            background-size 0px
+
+        &:hover
+          transform rotateY(0deg)
+
+          button:hover
+            background-color std-hover-background
+
+        button
+          display inline-block
+          padding 0px
+          border 0px
+          margin 0px
+          background-color transparent
+          background-position center
+          background-repeat no-repeat
+          background-size (std-square-size - 2 * std-square-margin)
+          mix-std-inner-square(1)
+
+          &.close-button
+            background-image url(../image/close.svg)
+
+          &.fullscreen-button
+            background-image url(../image/fullscreen.svg)
+
+    .article-container .article
+      p, h1, h2, h3
+        display block
+
+      .article-figure
+        background-size cover
+
+      .content
+        .genre
+          span
+            display inline-block
+            mix-square(auto)
+
+          .title
+            margin-right std-square-margin
+
+    .zoom-in-radio:not(:checked) + .article-container
+      &:hover
+        background-color std-hover-background
+
+      &:active
+        background-color std-active-background
+
+      .image, .background-image, .article-figure
+        mix-std-inner-square(3)
+
+      .image-container :not(:first-child)
+        display none
+
+      .content
+        width fun-std-inner-size(4)
+        height fun-std-inner-size(3)
+        vertical-align top
+        overflow hidden
+        &.wide
+          width fun-std-inner-size(7)
+
+      .zoom-out-button-container, .main-link-container
+        display none
+
+      button.play
+        display none
+
+    .zoom-in-radio:checked + .article-container
+      display block
+      background-color std-zoomed-article-background
+      position fixed
+      left 0px
+      top 0px
+      right 0px
+      bottom 0px
+      overflow-y auto
+      z-index 4
+
+      .article, .image-container, .article-figure, .content, .game-name, .genre, .paragraph
+        display block
+
+      html:not(.javascript-enabled) &
+        .image-container .article-figure
+          display inline-block
+
+      html.javascript-enabled &
+        .image-container
+          position static
+          perspective 750px
+          perspective-origin center
+          height fun-std-inner-size(5)
+
+          .wrap
+            translate = (fun-std-inner-size(4) / 2)
+            position absolute
+            left 0px
+            right 0px
+            margin auto
+            transform-style preserve-3d
+            height fun-std-inner-size(4)
+            animation horizontal-spin 5s infinite linear
+
+            *
+              backface-visibility hidden
+
+            :nth-child(1)
+              transform translateZ(translate)
+
+            :nth-child(2)
+              transform rotateY(-270deg) translateX(translate)
+              transform-origin top right
+
+            :nth-child(3)
+              transform translateZ(- translate) rotateY(180deg)
+
+            :nth-child(4)
+              transform rotateY(270deg) translateX(- translate)
+              transform-origin center left
+
+          .article-figure
+            display block
+            position absolute
+            height fun-std-inner-size(4)
+            top std-square-size
+            left 0px
+            right 0px
+            margin-left auto
+            margin-right auto
+
+      .image, .background-image, .article-figure
+        mix-std-inner-rectangle(4, 3)
+
+      .zoom-out-button-container
+        position fixed
+        right 0px
+        bottom 0px
+        margin std-square-margin
+        background-color std-theme-background
+        mix-std-inner-rectangle(4, 1)
+
+        &:hover
+          background-color std-hover-background
+
+        &:active
+          background-color std-active-background
+
+        .zoom-out-button
+          text-transform uppercase
+          text-align center
+          vertical-align middle
+          font-size 1.5em
+          line-height std-square-size
+          background-color transparent
+          mix-square(100%)
+
+      button.play
+        display inline-block
+        border 0px
+        background-color transparent
+        background-image url(../image/play-button.svg)
+        background-position center
+        background-repeat no-repeat
+        background-size contain
+        mix-std-inner-square(1)
+
+        &::after
+          color white
+          text-transform uppercase
+          text-align left
+          position relative
+          display inline-block
+          left std-square-size
+          content 'play now'
+          font-size 2.5em
+          overflow hidden
+          transition-duration 200ms
+          transition-timing-function ease
+          transform-origin left
+          padding-top std-square-margin
+          padding-bottom std-square-margin
+          mix-std-inner-rectangle(3, 1)
+
+        &:not(:hover)::after
+          transform rotateY(90deg)
+
+        &:hover::after
+          transform rotateY(0deg)
+
+  #aside
+    position absolute
+    top fun-std-inner-limit(1)
+    right 0px
+    width fun-std-inner-size(3)
+    float right
+    margin std-square-margin
+
+    article
+      mix-std-inner-rectangle(3, 6)
+
+// ADAPTIVE RULES
+
+@media (min-width: adaptive-split)
+  #main-footer > .copyright-claim > p
+    display inline-block
+    width (adaptive-split / 2)
+    vertical-align middle
+    margin 0px
+    padding 0px
+
+@media (max-width: adaptive-split)
+  #main-footer > .copyright-claim > p
+    display block
+    margin-top std-square-margin
+    margin-bottom std-square-margin
+
+@media screen
+  body
+    background-color std-theme-background
+    color white
+
+  .no-screen, .print-only
+    display none
+
+@media print
+  *
+    background-color white
+    color black
+
+  .no-print, .screen-only
+    display none !important

@@ -8,22 +8,23 @@ const {info} = global.console
 const jtry = require('just-try')
 const {mkdirSync, writeFileSync} = require('fs-force')
 const rgxmap = require('./build-rules.js')
+const ignore = require('./ignore-rules.js')
 const depsTree = require('./get-deps-tree.js')
 const {projdir, src, out, lib, dep, getlib, jreq, tryReadJSON} = require('../lib/common-vars.js')
 const cmpset = require('../lib/compare-set.js')
 const getModifiedDate = require('../lib/get-mtime.js')
 const createdOutputFiles = new Set()
 const mtimeTable = tryReadJSON(join(dep, 'mtime.json'))
-const markedChanges = getChangedFiles()
 const genDepsTree = assign({}, require('./dep-map-json.js'))
+const markedChanges = getChangedFiles()
 
 info(`\n${markedChanges.size} files are marked as modified.`)
 info('\nBUILDING...')
 compile(src, out, 0)
-writeFileSync(join(dep, 'dependencies.json'), JSON.stringify(genDepsTree, undefined, 2))
 info('\nCLEANING...')
 clean(out)
-info('\ndone.')
+info('\nUPDATING...')
+update()
 
 function getChangedFiles () {
   const result = new Set()
@@ -32,6 +33,7 @@ function getChangedFiles () {
   for (const filename in mtimeTable) {
     if (!existsSync(filename)) {
       delete mtimeTable[filename]
+      delete genDepsTree[filename]
       current.delete(filename)
     }
   }
@@ -44,7 +46,6 @@ function getChangedFiles () {
       }
     }
   } while (!cmpset(previous, current))
-  writeFileSync(join(dep, 'mtime.json'), JSON.stringify(mtimeTable, undefined, 2))
   return result
   function check (name) {
     if (result.has(name)) return true
@@ -63,6 +64,7 @@ function getChangedFiles () {
 }
 
 function compile (source, target, level) {
+  if (ignore(source)) return
   const stats = statSync(source)
   if (stats.isDirectory()) {
     mkdirSync(target)
@@ -76,17 +78,14 @@ function compile (source, target, level) {
       createdOutputFiles.add(target)
       if (markedChanges.has(source)) {
         const sourcecode = readFileSync(source)
-        const locals = {projdir, src, out, lib, source, target, dir, name, sourcecode, require, getlib, jreq, markedChanges}
+        const locals = {projdir, src, out, lib, source, target, dir, name, sourcecode, require, getlib, jreq, markedChanges, level}
         info('▸▸ @bd ' + source)
         const {body, dependencies} = build(sourcecode, locals)
         genDepsTree[source] = dependencies
         writeFileSync(target, body)
         info(`   ${isTargetExists ? '~~~' : '+++'} ` + target + ' (up to date)')
-        return true
-      } else {
-        info('▸▸ @ig ' + source + ' (already up to date)')
-        return true
       }
+      return true
     }) || updateVersion(source, target)
   } else {
     throw new Error(`Invalid type of fs entry: ${source}`)
@@ -103,6 +102,11 @@ function clean (target) {
   }
 }
 
+function update () {
+  writeFileSync(join(dep, 'dependencies.json'), JSON.stringify(genDepsTree, undefined, 2))
+  writeFileSync(join(dep, 'mtime.json'), JSON.stringify(mtimeTable, undefined, 2))
+}
+
 function updateVersion (source, target) {
   const isTargetExists = existsSync(target)
   createdOutputFiles.add(target)
@@ -110,8 +114,6 @@ function updateVersion (source, target) {
     info('▸▸ @cp ' + source)
     writeFileSync(target, readFileSync(source))
     info(`   ${isTargetExists ? '~~~' : '+++'} ` + target + ' (up to date)')
-  } else {
-    info('▸▸ @ig ' + source + ' (already up to date)')
   }
 }
 

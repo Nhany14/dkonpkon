@@ -1,1 +1,53 @@
 extends ../lib/layout.pug
+
+block append data
+  -
+    const gameYamlData = []
+    for (const yamlfilename of readdirSync(join(lib, 'game'))) {
+      const subdata = getyamlobj(`game/${yamlfilename}`)
+      for (const subitem in subdata) {
+        const subpage = parse(yamlfilename).name
+        const key = parse(subitem).name
+        const {name, genre, description} = subdata[subitem]
+        gameYamlData.push({key, subpage, name, genre, description: renderMarkdownIt(description)})
+      }
+    }
+
+  +pretty-json-script(getyamlobj('genre.yaml'))#data-genre
+  +pretty-json-script(sitemap)#data-sitemap
+  +pretty-json-script(Object.getOwnPropertyNames(categories))#data-subpages
+  +pretty-json-script(gameYamlData)#data-game-list
+
+  template#single-search-result-template
+    .single-search-result
+      h2.name.heading.title: a.link.hyperlink.pointer-cursor
+      p.genre
+      p.description.details
+
+block main-section
+  #search-result.search-result
+
+  main#main.no-side-pane
+    input.zoom-out-radio#no-zoomed-article(type = 'radio' name = 'zoom-article' checked hidden)
+    each content, category in categories
+      -
+        const radio = 'show-' + category + '-radio'
+      input.zoom-in-radio(type = 'radio' id = radio name = 'zoom-article' hidden)
+      label.article-container(for = radio id = 'article-' + category + '-container')
+        article.article(id = category + '-article')
+          -
+            const imageurl = [siteroot, 'image', 'category', category].join('/')
+            const siteurl = [siteroot, 'page', category + '.html'].join('/')
+
+          +background-image(imageurl).article-figure
+          .text.content
+            h2= content.title
+            p.description.paragraph
+              != renderMarkdownIt(content.description)
+
+          p.main-link-container
+            a.main-link.link.pointer-cursor.underline(href = siteurl) Go to #{content.title}
+          label.zoom-out-button-container(for = 'no-zoomed-article'): .zoom-out-button đóng
+
+block append body-script
+  +script-list(siteroot, 'index-search')
